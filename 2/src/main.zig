@@ -118,6 +118,7 @@ pub fn part2(input: []const u8, alloc: Allocator) !usize {
     var safe_count: usize = 0;
     var lines = utils.lines(input);
     while (lines.next()) |line| {
+        if (line.len == 0) continue;
         const safe = isSafe(line, alloc) catch false;
         if (safe) safe_count += 1;
     }
@@ -136,11 +137,11 @@ fn isSafe(line: []const u8, alloc: Allocator) !bool {
         try list.append(alloc, val);
     }
 
-    log.debug("{s}: ", .{line});
+    log.debug("line: {s}", .{line});
     var safe = isSafeBranch(&list, null);
     if (safe) return safe;
     for (list.items, 0..) |_, iteration| {
-        log.debug("{s}: ", .{line});
+        log.debug("line: {s}", .{line});
         safe = isSafeBranch(&list, iteration);
         if (safe) return safe;
     }
@@ -152,9 +153,11 @@ fn isSafeBranch(list: *ArrayList(usize), iteration: ?usize) bool {
     var prev_val: ?usize = null;
     var safe = false;
 
-    var run: isize = -1;
-    if (iteration != null) run = @intCast(iteration.?);
-    log.debug("[{any}]: ", .{run});
+    if (iteration == null) {
+        log.debug("iteration: initial", .{});
+    } else {
+        log.debug("iteration: {any}", .{iteration});
+    }
 
     for (list.items, 0..) |val, i| {
         if (i == iteration) continue;
@@ -171,18 +174,18 @@ fn isSafeBranch(list: *ArrayList(usize), iteration: ?usize) bool {
 
         if (direction == Direction.increasing and val < prev) {
             safe = false;
-            log.debug("NOT SAFE (direction changed)\n", .{});
+            log.debug("outcome: NOT SAFE (direction changed)", .{});
             break;
         } else if (direction == Direction.decreasing and val > prev) {
             safe = false;
-            log.debug("NOT SAFE (direction changed)\n", .{});
+            log.debug("outcome: NOT SAFE (direction changed)", .{});
             break;
         }
 
         const delta = @abs(@as(isize, @intCast(prev)) - @as(isize, @intCast(val)));
         if (delta < 1 or delta > 3) {
             safe = false;
-            log.debug("NOT SAFE (delta {d} out of range)\n", .{delta});
+            log.debug("outcome: NOT SAFE (delta {d} out of range)", .{delta});
             break;
         }
         prev_val = val;
@@ -190,7 +193,7 @@ fn isSafeBranch(list: *ArrayList(usize), iteration: ?usize) bool {
     }
 
     if (safe) {
-        log.debug("SAFE\n", .{});
+        log.debug("outcome: SAFE", .{});
     }
     return safe;
 }
