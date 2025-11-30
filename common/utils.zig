@@ -21,17 +21,29 @@ pub fn heapSortAsc(T: type, items: []T) void {
     return std.sort.heap(T, items, {}, LessThan(T).lessThanFn);
 }
 
+test "heapSortAsc" {
+    var arr = [_]i32{ 3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5 };
+    heapSortAsc(i32, &arr);
+    try std.testing.expectEqualSlices(i32, &arr, &[_]i32{ 1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9 });
+}
+
 pub fn GreaterThan(T: anytype) type {
     return struct {
-        pub fn lessThanFn(_: void, a: T, b: T) bool {
-            return a < b;
+        pub fn greaterThanFn(_: void, a: T, b: T) bool {
+            return a > b;
         }
     };
 }
 
 /// Sort built-in numeric types in *descending* order
 pub fn heapSortDes(T: type, items: []T) void {
-    return std.sort.heap(T, items, {}, GreaterThan(T).lessThanFn);
+    return std.sort.heap(T, items, {}, GreaterThan(T).greaterThanFn);
+}
+
+test "heapSortDes" {
+    var arr = [_]i32{ 3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5 };
+    heapSortDes(i32, &arr);
+    try std.testing.expectEqualSlices(i32, &arr, &[_]i32{ 9, 6, 5, 5, 5, 4, 3, 3, 2, 1, 1 });
 }
 
 /// Count occurances of 'value' within 'haystack'
@@ -41,7 +53,9 @@ pub fn countScalar(T: anytype, haystack: []const T, value: T) usize {
 
 /// Split the input by newline chars "\n"
 /// Note: This keeps empty lines
-pub fn lines(input: []const u8) SplitIterator {
+pub fn lines(
+    input: []const u8,
+) SplitIterator {
     return std.mem.splitSequence(u8, input, "\n");
 }
 
